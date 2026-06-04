@@ -1,0 +1,6 @@
+@RDPCrystalRestService_HostAddress = http://localhost:5137
+
+GET {{RDPCrystalRestService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

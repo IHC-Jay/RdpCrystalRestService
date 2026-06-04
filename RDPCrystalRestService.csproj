@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.3" />
+    <PackageReference Include="RDPCrystalEDILibrary.NetCore" Version="11.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="InterSystems.Data.IRISClient">
+      <HintPath>IRIS\InterSystems.Data.IRISClient.dll</HintPath>
+    </Reference>
+    <Reference Include="InterSystems.Data.Utils">
+      <HintPath>IRIS\InterSystems.Data.Utils.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="publish\**\*" />
+    <None Remove="publish\**\*" />
+    <Content Remove="bin\Release\**\publish\**\*" />
+    <None Remove="bin\Release\**\publish\**\*" />
+  </ItemGroup>
+
+</Project>
