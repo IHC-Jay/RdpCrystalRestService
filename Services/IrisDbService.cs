@@ -109,6 +109,7 @@ public sealed class IrisDbService
     public string RdpErrorsToIris(string? nameSpace, EDIValidator validator, string x12Id, string sessionId, string? ackStr, int logToDb)
     {
         string validationStr = string.Empty;
+        string targetNamespace = ResolveTargetNamespace(nameSpace);
 
         if (validator.Errors.Count <= 0)
         {
@@ -122,6 +123,14 @@ public sealed class IrisDbService
         {
             if (logToDb == 1)
             {
+                _logger.LogInformation(
+                    "Attempting IRIS validation error write. Host={Host}, Port={Port}, Namespace={Namespace}, ErrorCount={ErrorCount}, X12DataId={X12DataId}, SessionId={SessionId}",
+                    _irisOptions.Host,
+                    _irisOptions.Port,
+                    targetNamespace,
+                    validator.Errors.Count,
+                    x12Id,
+                    sessionId);
                 irisConnect = ConnectToIris(nameSpace);
             }
 
@@ -186,12 +195,29 @@ public sealed class IrisDbService
 
             if (logToDb == 1)
             {
+                _logger.LogInformation(
+                    "IRIS validation error write succeeded. Host={Host}, Port={Port}, Namespace={Namespace}, InsertedRows={InsertedRows}, X12DataId={X12DataId}, SessionId={SessionId}",
+                    _irisOptions.Host,
+                    _irisOptions.Port,
+                    targetNamespace,
+                    insertedRows,
+                    x12Id,
+                    sessionId);
                 return "IRIS logging succeeded. Inserted " + insertedRows + " validation error row(s).";
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to write validation errors to IRIS.");
+            _logger.LogError(
+                ex,
+                "Failed to write validation errors to IRIS. Host={Host}, Port={Port}, Namespace={Namespace}, ErrorCount={ErrorCount}, X12DataId={X12DataId}, SessionId={SessionId}, LogToDb={LogToDb}",
+                _irisOptions.Host,
+                _irisOptions.Port,
+                targetNamespace,
+                validator.Errors.Count,
+                x12Id,
+                sessionId,
+                logToDb);
             return "IRIS logging failed: " + ex.Message;
         }
         finally
@@ -204,7 +230,7 @@ public sealed class IrisDbService
 
     private IRISConnection ConnectToIris(string? nameSpace)
     {
-        string targetNamespace = string.IsNullOrWhiteSpace(nameSpace) ? _irisOptions.DefaultNamespace : nameSpace;
+        string targetNamespace = ResolveTargetNamespace(nameSpace);
 
         if (string.IsNullOrWhiteSpace(_irisOptions.Host) ||
             string.IsNullOrWhiteSpace(_credentialsOptions.Iris.Username) ||
@@ -212,6 +238,13 @@ public sealed class IrisDbService
         {
             throw new InvalidOperationException("IRIS configuration is incomplete. Set Iris:Host and Credentials:Iris:Username/Password.");
         }
+
+        _logger.LogInformation(
+            "Opening IRIS connection. Host={Host}, Port={Port}, Namespace={Namespace}, Username={Username}",
+            _irisOptions.Host,
+            _irisOptions.Port,
+            targetNamespace,
+            _credentialsOptions.Iris.Username);
 
         var connection = new IRISConnection
         {
@@ -224,6 +257,11 @@ public sealed class IrisDbService
 
         connection.Open();
         return connection;
+    }
+
+    private string ResolveTargetNamespace(string? nameSpace)
+    {
+        return string.IsNullOrWhiteSpace(nameSpace) ? _irisOptions.DefaultNamespace : nameSpace;
     }
 
     private static void X12ToFile(string x12Data, string filePath)
