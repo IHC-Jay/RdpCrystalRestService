@@ -369,6 +369,11 @@ public sealed class X12Controller : ControllerBase
               .Append(';');
         }
 
+        if (!string.IsNullOrWhiteSpace(dbWriteResult))
+        {
+            sb.Append("IRIS Logging: ").Append(dbWriteResult).Append(';');
+        }
+
         return Truncate(sb.ToString());
     }
 

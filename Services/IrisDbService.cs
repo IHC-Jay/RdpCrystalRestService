@@ -116,6 +116,7 @@ public sealed class IrisDbService
         }
 
         IRISConnection? irisConnect = null;
+        int insertedRows = 0;
 
         try
         {
@@ -170,11 +171,11 @@ public sealed class IrisDbService
                     irisCmd.Parameters.Add(new IRISParameter("ErrorType", IRISDbType.NVarChar) { Value = "Error" });
                     irisCmd.Parameters.Add(new IRISParameter("X12DataId", IRISDbType.NVarChar) { Value = x12Id });
                     irisCmd.Parameters.Add(new IRISParameter("TransactionType", IRISDbType.NVarChar) { Value = error.STSegment?.Elements.ElementAt(0)?.ToString() ?? "ERROR" });
-                    irisCmd.Parameters.Add(new IRISParameter("ProcessDtTm", IRISDbType.DateTime) { Value = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") });
+                    irisCmd.Parameters.Add(new IRISParameter("ProcessDtTm", IRISDbType.DateTime) { Value = DateTime.UtcNow });
                     irisCmd.Parameters.Add(new IRISParameter("SessionId", IRISDbType.NVarChar) { Value = sessionId });
                     irisCmd.Parameters.Add(new IRISParameter("Ack", IRISDbType.NVarChar) { Value = ackStr ?? string.Empty });
 
-                    _ = irisCmd.ExecuteNonQuery();
+                    insertedRows += irisCmd.ExecuteNonQuery();
                 }
                 else
                 {
@@ -182,10 +183,16 @@ public sealed class IrisDbService
                                      error.ElementOrdinal + ", " + error.Message + ", " + error.Description + ", Field Value: " + fieldValue + ";";
                 }
             }
+
+            if (logToDb == 1)
+            {
+                return "IRIS logging succeeded. Inserted " + insertedRows + " validation error row(s).";
+            }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to write validation errors to IRIS.");
+            return "IRIS logging failed: " + ex.Message;
         }
         finally
         {
