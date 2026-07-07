@@ -144,13 +144,13 @@ public sealed class IrisDbService
                 }
 
                 string fieldValue = "<EMPTY>";
-                if (error.ValidatingSegment.Elements.Count >= error.ElementOrdinal &&
-                    error.ElementOrdinal >= 0 &&
-                    error.ValidatingSegment.Elements.ElementAt(error.ElementOrdinal) != null)
+                if (error.ElementOrdinal >= 0 &&
+                    error.ElementOrdinal < error.ValidatingSegment.Elements.Count &&
+                    error.ValidatingSegment.Elements[error.ElementOrdinal] != null)
                 {
                     try
                     {
-                        LightWeightElement element = error.ValidatingSegment.Elements.ElementAt(error.ElementOrdinal);
+                        LightWeightElement element = error.ValidatingSegment.Elements[error.ElementOrdinal];
                         fieldValue = element.Composite ? string.Join(":", element.Elements) : element.ToString();
                         if (string.IsNullOrWhiteSpace(fieldValue))
                         {
@@ -165,6 +165,12 @@ public sealed class IrisDbService
 
                 if (logToDb == 1 && irisConnect != null)
                 {
+                    string transactionType = "ERROR";
+                    if (error.STSegment?.Elements != null && error.STSegment.Elements.Count > 0)
+                    {
+                        transactionType = error.STSegment.Elements[0]?.ToString() ?? "ERROR";
+                    }
+
                     using var irisCmd = new IRISCommand(queryString, irisConnect);
 
                     irisCmd.Parameters.Add(new IRISParameter("LineNum", IRISDbType.Int) { Value = error.LineNumber });
@@ -179,7 +185,7 @@ public sealed class IrisDbService
                     irisCmd.Parameters.Add(new IRISParameter("ErrorDesc", IRISDbType.NVarChar) { Value = error.Description });
                     irisCmd.Parameters.Add(new IRISParameter("ErrorType", IRISDbType.NVarChar) { Value = "Error" });
                     irisCmd.Parameters.Add(new IRISParameter("X12DataId", IRISDbType.NVarChar) { Value = x12Id });
-                    irisCmd.Parameters.Add(new IRISParameter("TransactionType", IRISDbType.NVarChar) { Value = error.STSegment?.Elements.ElementAt(0)?.ToString() ?? "ERROR" });
+                    irisCmd.Parameters.Add(new IRISParameter("TransactionType", IRISDbType.NVarChar) { Value = transactionType });
                     irisCmd.Parameters.Add(new IRISParameter("ProcessDtTm", IRISDbType.DateTime) { Value = DateTime.UtcNow });
                     irisCmd.Parameters.Add(new IRISParameter("SessionId", IRISDbType.NVarChar) { Value = sessionId });
                     irisCmd.Parameters.Add(new IRISParameter("Ack", IRISDbType.NVarChar) { Value = ackStr ?? string.Empty });
