@@ -289,15 +289,27 @@ public sealed class RdpValidateService
             // Fail: Jose2, John  Smith
             string firstNamePattern = @"^[A-Za-z](?:[A-Za-z'()-]*[A-Za-z)])?(?: +[A-Za-z](?:[A-Za-z'()-]*[A-Za-z)])?)*$";
 
+            bool nm2Match = nm2.Length == 0 || Regex.IsMatch(nm2, lastNamePattern);
+            bool nm3Match = nm3.Length == 0 || Regex.IsMatch(nm3, firstNamePattern);
+
             if (nm2.Length > 0)
             {
-                e.ConditionValid = !Regex.IsMatch(nm2, lastNamePattern);
+                e.ConditionValid = !nm2Match;
             }
 
             if (nm3.Length > 0 && e.ConditionValid == false)
             {
-                e.ConditionValid = !Regex.IsMatch(nm3, firstNamePattern);
+                e.ConditionValid = !nm3Match;
             }
+
+            _logger.LogInformation(
+                "nmValidation debug: Segment={Segment}, Nm2={Nm2}, Nm3={Nm3}, Nm2Match={Nm2Match}, Nm3Match={Nm3Match}, ConditionValid={ConditionValid}",
+                e.CurrentSegment?.ToString() ?? string.Empty,
+                nm2,
+                nm3,
+                nm2Match,
+                nm3Match,
+                e.ConditionValid);
         }
         else if (e.CodeCondition.Id.StartsWith("valueFound-", StringComparison.Ordinal) ||
                  e.CodeCondition.Id.StartsWith("valueNotFound-", StringComparison.Ordinal))
