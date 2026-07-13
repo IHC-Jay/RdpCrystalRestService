@@ -279,8 +279,10 @@ public sealed class RdpValidateService
             string nm2 = SafeElementValue(e, 2);
             string nm3 = SafeElementValue(e, 3);
             // Examples that should pass: O DONNELL, O'NEILL, Mary Jane.
+            // Example with one-character first name that should pass: NM1*03*1*OWEN*S~
+            // Example with parentheses that should pass: KING*JACKSON (ORTHO)
             // Examples that should fail: Jose2, J. P. Morgan, John  Smith.
-            string pattern = @"^[A-Za-z](?:[A-Za-z'-]*[A-Za-z])?(?: [A-Za-z](?:[A-Za-z'-]*[A-Za-z])?)*$";
+            string pattern = @"^[A-Za-z](?:[A-Za-z'()-]*[A-Za-z])?(?: [A-Za-z](?:[A-Za-z'()-]*[A-Za-z])?)*$";
 
             if (nm2.Length > 0)
             {
