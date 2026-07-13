@@ -207,7 +207,7 @@ public sealed class RdpValidateService
 
         if (e.CodeCondition.Id == "npiValidation")
         {
-            if (SafeElementValue(e, 0) == "1P")
+            if (SafeElementValue(e, 0) == "1P" && SafeElementValue(e, 7) == "XX")
             {
                 string npiNum = SafeElementValue(e, 8);
                 e.ConditionValid = !Util.NpiValidator.IsValidNpi(npiNum);
