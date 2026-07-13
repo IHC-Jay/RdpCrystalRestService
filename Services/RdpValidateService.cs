@@ -280,9 +280,10 @@ public sealed class RdpValidateService
             string nm3 = SafeElementValue(e, 3);
 
             // Last name (nm2): requires at least 2 characters.
-            // Pass: WYGAL, O'DONNELL, LOYOLA-MANRIQUE, JACKSON (ORTHO), SMITH, JR
+            // Pass: WYGAL, O'DONNELL, LOYOLA-MANRIQUE, MORALES- MONTILLA, SMITH, JR
             // Fail: Jose2, J. P. Morgan, John  Smith
-            string lastNamePattern = @"^[A-Za-z](?:[A-Za-z'(),-]*[A-Za-z)])?(?: +[A-Za-z](?:[A-Za-z'(),-]*[A-Za-z)])?)*$";
+            // Allows optional spaces around punctuation like hyphen/comma/apostrophe/parentheses.
+            string lastNamePattern = @"^[A-Za-z](?:[A-Za-z]|[(),'-]\s*)*(?:[A-Za-z)])(?: +[A-Za-z](?:[A-Za-z]|[(),'-]\s*)*(?:[A-Za-z)]))*$";
 
             // First name (nm3): allows single character (e.g. J, S, C).
             // Pass: J, JOHN, A GIRL TAMARA, O'NEILL, TENLEE(ORTHO)
