@@ -282,12 +282,12 @@ public sealed class RdpValidateService
             // Last name (nm2): requires at least 2 characters.
             // Pass: WYGAL, O'DONNELL, LOYOLA-MANRIQUE, JACKSON (ORTHO), SMITH, JR
             // Fail: Jose2, J. P. Morgan, John  Smith
-            string lastNamePattern = @"^[A-Za-z][A-Za-z'(),-]+(?: +[A-Za-z](?:[A-Za-z'(),-]*[A-Za-z])?)*$";
+            string lastNamePattern = @"^[A-Za-z](?:[A-Za-z'(),-]*[A-Za-z)])?(?: +[A-Za-z](?:[A-Za-z'(),-]*[A-Za-z)])?)*$";
 
             // First name (nm3): allows single character (e.g. J, S, C).
-            // Pass: J, JOHN, A GIRL TAMARA, O'NEILL
+            // Pass: J, JOHN, A GIRL TAMARA, O'NEILL, TENLEE(ORTHO)
             // Fail: Jose2, John  Smith
-            string firstNamePattern = @"^[A-Za-z](?:[A-Za-z'()-]*[A-Za-z])?(?: +[A-Za-z](?:[A-Za-z'()-]*[A-Za-z])?)*$";
+            string firstNamePattern = @"^[A-Za-z](?:[A-Za-z'()-]*[A-Za-z)])?(?: +[A-Za-z](?:[A-Za-z'()-]*[A-Za-z)])?)*$";
 
             if (nm2.Length > 0)
             {
