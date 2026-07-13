@@ -207,7 +207,7 @@ public sealed class RdpValidateService
 
         if (e.CodeCondition.Id == "npiValidation")
         {
-            if (SafeElementValue(e, 0) == "1P" || SafeElementValue(e, 7) == "XX")
+            if (SafeElementValue(e, 0) == "1P" && SafeElementValue(e, 7) == "XX")
             {
                 string npiNum = SafeElementValue(e, 8);
                 e.ConditionValid = !Util.NpiValidator.IsValidNpi(npiNum);
@@ -278,20 +278,25 @@ public sealed class RdpValidateService
         {
             string nm2 = SafeElementValue(e, 2);
             string nm3 = SafeElementValue(e, 3);
-            // Examples that should pass: O DONNELL, O'NEILL, Mary Jane.
-            // Example with one-character first name that should pass: NM1*03*1*OWEN*S~
-            // Example with parentheses that should pass: KING*JACKSON (ORTHO)
-            // Examples that should fail: Jose2, J. P. Morgan, John  Smith.
-            string pattern = @"^[A-Za-z](?:[A-Za-z'()-]*[A-Za-z])?(?: [A-Za-z](?:[A-Za-z'()-]*[A-Za-z])?)*$";
+
+            // Last name (nm2): requires at least 2 characters.
+            // Pass: WYGAL, O'DONNELL, LOYOLA-MANRIQUE, JACKSON (ORTHO)
+            // Fail: Jose2, J. P. Morgan, John  Smith
+            string lastNamePattern = @"^[A-Za-z][A-Za-z'()-]+(?: [A-Za-z](?:[A-Za-z'()-]*[A-Za-z])?)*$";
+
+            // First name (nm3): allows single character (e.g. J, S, C).
+            // Pass: J, JOHN, A GIRL TAMARA, O'NEILL
+            // Fail: Jose2, John  Smith
+            string firstNamePattern = @"^[A-Za-z](?:[A-Za-z'()-]*[A-Za-z])?(?: [A-Za-z](?:[A-Za-z'()-]*[A-Za-z])?)*$";
 
             if (nm2.Length > 0)
             {
-                e.ConditionValid = !Regex.IsMatch(nm2, pattern);
+                e.ConditionValid = !Regex.IsMatch(nm2, lastNamePattern);
             }
 
             if (nm3.Length > 0 && e.ConditionValid == false)
             {
-                e.ConditionValid = !Regex.IsMatch(nm3, pattern);
+                e.ConditionValid = !Regex.IsMatch(nm3, firstNamePattern);
             }
         }
         else if (e.CodeCondition.Id.StartsWith("valueFound-", StringComparison.Ordinal) ||
